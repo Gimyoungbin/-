@@ -1,6 +1,6 @@
 void setup() {
   Serial.begin(9600);
-  pinMode(D7, INPUT);
+
 
 }
 
