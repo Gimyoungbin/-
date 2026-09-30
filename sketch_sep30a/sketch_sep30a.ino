@@ -35,11 +35,9 @@ void loop()
     if(armed)
     {
       int v = analogRead(A0);
-      Serial.println(v);
-      Serial.println(armed);
-     
-
-    }
+      Serial.println(analogRead(A0));
+    
+     }
 
    
 
