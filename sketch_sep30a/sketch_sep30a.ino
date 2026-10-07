@@ -72,6 +72,7 @@ void setup()
   pinMode(D4, INPUT_PULLUP);  // 시작 버튼
   pinMode(D6, INPUT_PULLUP);  // 반응 버튼
   pinMode(D9, OUTPUT);        // 부저
+  pinMode(D12, OUTPUT);
   pinMode(D13, OUTPUT);       // LED
 
   randomSeed(analogRead(A0));
@@ -134,6 +135,7 @@ void loop()
         Serial.println("GO!");
 
         tone(D9, 2000);
+        digitalWrite(D12, HIGH);
 
         goTime = millis();
 
@@ -152,6 +154,7 @@ void loop()
       if (hit6)
       {
         noTone(D9);
+        digitalWrite(D12, LOW);
 
         digitalWrite(D13, LOW);
 
