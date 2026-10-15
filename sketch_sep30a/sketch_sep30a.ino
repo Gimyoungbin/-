@@ -1,58 +1,61 @@
+
 int lastSw = HIGH;
-bool armed = false;
-bool alarming = false;
+long cnt = 0;
+unsigned long Mil = 0;
+long startTime,endTime;
+int pw =0;
+const int password = 221;
 
 
-void setup() 
+void setup()
 {
   Serial.begin(9600);
-  pinMode(D4, INPUT_PULLUP);  // 스위치
-  pinMode(D9, OUTPUT);        // 부저
-  pinMode(D13, OUTPUT);       // 상태 LED
+  pinMode(D4, INPUT_PULLUP);
+}
+
+void loop()
+{
+  int sw = digitalRead(D4);
+
+  if (lastSw == HIGH && sw == LOW)
+  {
+    delay(20);
+    startTime = millis();
+  }
+
+  if (lastSw == LOW && sw == HIGH)
+  {
+    delay(20);
+    endTime = millis();
+    if(endTime - startTime > 500)
+    {
+      pw = pw * 10 + 2;
+    }
+    else
+    {
+      pw = pw * 10 + 1;
+    }
+    cnt++;
+
+    Serial.println(pw);
+  }
+  if(cnt >=3)
+  {
+    if(password == pw)
+    {
+      Serial.println("unlock");
+    }
+    else
+    {
+      Serial.println("Lock");
+    }
+    pw = 0;
+    cnt = 0;
+
+  }
+
+  lastSw = sw;
+
 }
 
 
-void loop()
- {
-  int sw = digitalRead(D4);
-  //Serial.println(sw);
- 
-    if (lastSw == HIGH && sw == LOW) 
-    {   // 방금 눌림
-    delay(20);
-    armed = !armed;                    // 경보 ON / OFF
-    digitalWrite(D13, armed);
-        if (!armed) 
-        { 
-          noTone(D9); 
-          alarming = false; 
-        }
-
-    }
-    
-    lastSw = sw;
-    //버튼이 눌려있다면 실행한다
-    if(armed)
-    {
-      int v = analogRead(A0);
-      if(v > 280 && alarming == false)
-      {
-        //여기는 어두운 곳
-        tone(D9, 1000); 
-        Serial.println("Start");
-        alarming = true;
-      }
-      if(v <= 280 && alarming == true)
-      {
-        //여기는 밝은 곳
-        noTone(D9); 
-        Serial.println("End");
-        alarming = false;
-      }
-    
-     }
-
-   
-
-  }
-  
