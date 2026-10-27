@@ -1,61 +1,14 @@
-
-int lastSw = HIGH;
-long cnt = 0;
-unsigned long Mil = 0;
-long startTime,endTime;
-int pw =0;
-const int password = 221;
-
-
-void setup()
+void setup() 
 {
-  Serial.begin(9600);
-  pinMode(D4, INPUT_PULLUP);
+  Serial.begin(9600); // 약속한 속도로 포트를 연다
 }
-
 void loop()
 {
-  int sw = digitalRead(D4);
-
-  if (lastSw == HIGH && sw == LOW)
-  {
-    delay(20);
-    startTime = millis();
+  if (Serial.available() > 0){  // 도착한 게 있나?
+    char c = Serial.read();      // 한 글자 꺼낸다
+    Serial.print("got: ");
+    Serial.println(c);
   }
-
-  if (lastSw == LOW && sw == HIGH)
-  {
-    delay(20);
-    endTime = millis();
-    if(endTime - startTime > 500)
-    {
-      pw = pw * 10 + 2;
-    }
-    else
-    {
-      pw = pw * 10 + 1;
-    }
-    cnt++;
-
-    Serial.println(pw);
-  }
-  if(cnt >=3)
-  {
-    if(password == pw)
-    {
-      Serial.println("unlock");
-    }
-    else
-    {
-      Serial.println("Lock");
-    }
-    pw = 0;
-    cnt = 0;
-
-  }
-
-  lastSw = sw;
-
 }
 
 
