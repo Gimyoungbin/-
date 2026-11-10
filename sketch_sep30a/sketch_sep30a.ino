@@ -5,7 +5,7 @@ const int LED = LED_BUILTIN; // LD2
  
 float w1 = 1.0;
 float w2 = 1.0;
-float b = -1.5;
+float b = -0.5;
  
 void setup()
 {
