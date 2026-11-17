@@ -1,31 +1,80 @@
-const int LED_EXT = D7;  // 외부 LED
-const int BUZ = D6;  // 부저
-void setup()
-{
-  pinMode(LED_EXT, OUTPUT);
-  pinMode(BUZ, OUTPUT);
+// 2주차 perceptron_learn + 빛과 소리로 학습 과정 보여 주기
+const int SW1 = D2, SW2 = D3;
+const int LED = LED_BUILTIN;
+const int LED_EXT = D7;   // 추가: 외부 LED
+const int BUZ     = D6;   // 추가: 부저
+ 
+// 학습 데이터 (AND)
+int X[4][2] = {{0,0},{0,1},{1,0},{1,1}};
+int T[4]    = {  0,    0,    0,    1  };
+ 
+float w1 = 0, w2 = 0, b = 0;
+float lr = 0.25;   // 학습률
+ 
+int predict(int x1, int x2) {
+  return (w1*x1 + w2*x2 + b > 0) ? 1 : 0;
 }
-
-// void loop()
-// {
-//   digitalWrite(LED_EXT, HIGH);
-//   tone(BUZ, 1000, 100); // 1000Hz, 0.1초
-//   delay(500);
-//   digitalWrite(LED_EXT, LOW);
-//   delay(500);
-// }
-
-int notes[8] = {262, 294, 330, 349, 392, 440, 494, 523};
-
-void loop()
-{
-  for (int i = 0; i < 8; i++)
-  {
-    digitalWrite(LED_EXT, i % 2);
-    tone(BUZ, notes[i], 200);
-    delay(250);
+ 
+void printStatus(int epoch, int errors) {
+  Serial.print("epoch "); Serial.print(epoch);
+  Serial.print(" err ");  Serial.print(errors);
+  Serial.print(" w1 ");   Serial.print(w1);
+  Serial.print(" w2 ");   Serial.print(w2);
+  Serial.print(" b ");    Serial.println(b);
+}
+ 
+// 추가: 성공 멜로디 (도-미-솔)
+void success() {
+  tone(BUZ, 523, 150); delay(200);
+  tone(BUZ, 659, 150); delay(200);
+  tone(BUZ, 784, 300); delay(350);
+}
+ 
+// 추가: 실패 소리 (낮고 긴 음)
+void fail() {
+  tone(BUZ, 200, 800); delay(900);
+}
+ 
+void train() {
+  for (int epoch = 1; epoch <= 20; epoch++) {
+    int errors = 0;
+    for (int i = 0; i < 4; i++) {
+      int x1 = X[i][0], x2 = X[i][1];
+      int e = T[i] - predict(x1, x2);
+      if (e != 0) errors++;
+      w1 += lr * e * x1;
+      w2 += lr * e * x2;
+      b  += lr * e;
+    }
+    printStatus(epoch, errors);
+ 
+    // 추가: 한 바퀴마다 LED 깜빡, 틀린 게 있으면 '뚜'
+    digitalWrite(LED_EXT, HIGH);
+    if (errors > 0) tone(BUZ, 400, 150);
+    delay(300);
+    digitalWrite(LED_EXT, LOW);
+    delay(300);
+ 
+    if (errors == 0) { success(); return; }   // 다 맞힘!
   }
-  delay(1000);
+  fail();   // 20바퀴 안에 못 끝냄
 }
-
+ 
+void setup() {
+  Serial.begin(115200);
+  pinMode(SW1, INPUT_PULLUP);
+  pinMode(SW2, INPUT_PULLUP);
+  pinMode(LED, OUTPUT);
+  pinMode(LED_EXT, OUTPUT);   // 추가
+  pinMode(BUZ, OUTPUT);       // 추가
+  delay(2000);                // 창 열 시간
+  train();                    // 학습!
+}
+ 
+void loop() {   // 추론
+  int x1 = (digitalRead(SW1) == LOW) ? 1 : 0;
+  int x2 = (digitalRead(SW2) == LOW) ? 1 : 0;
+  digitalWrite(LED, predict(x1, x2));
+  delay(20);
+}
 
